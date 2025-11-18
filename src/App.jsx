@@ -1,71 +1,73 @@
+import { useEffect, useState } from 'react'
+import Hero from './components/Hero'
+import SegmentPicker from './components/SegmentPicker'
+import TopCreators from './components/TopCreators'
+
+const API = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+
 function App() {
+  const [segment, setSegment] = useState('')
+  const [seedLoading, setSeedLoading] = useState(false)
+  const [seeded, setSeeded] = useState(false)
+
+  const seed = async () => {
+    setSeedLoading(true)
+    try {
+      const res = await fetch(`${API}/seed`, { method: 'POST' })
+      if (!res.ok) throw new Error('Seed failed')
+      setSeeded(true)
+    } catch (e) {
+      console.error(e)
+      alert('Seeding failed. Is the backend database configured?')
+    } finally {
+      setSeedLoading(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)]"></div>
-
-      <div className="relative min-h-screen flex items-center justify-center p-8">
-        <div className="max-w-2xl w-full">
-          {/* Header with Flames icon */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center mb-6">
-              <img
-                src="/flame-icon.svg"
-                alt="Flames"
-                className="w-24 h-24 drop-shadow-[0_0_25px_rgba(59,130,246,0.5)]"
-              />
-            </div>
-
-            <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
-              Flames Blue
-            </h1>
-
-            <p className="text-xl text-blue-200 mb-6">
-              Build applications through conversation
-            </p>
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      <header className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-slate-900/70 bg-slate-900/90 border-b border-slate-800">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-fuchsia-500" />
+            <span className="font-semibold">CreatorChoice</span>
           </div>
-
-          {/* Instructions */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-blue-500/20 rounded-2xl p-8 shadow-xl mb-6">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold">
-                1
-              </div>
-              <div>
-                <h3 className="font-semibold text-white mb-1">Describe your idea</h3>
-                <p className="text-blue-200/80 text-sm">Use the chat panel on the left to tell the AI what you want to build</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4 mb-6">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold">
-                2
-              </div>
-              <div>
-                <h3 className="font-semibold text-white mb-1">Watch it build</h3>
-                <p className="text-blue-200/80 text-sm">Your app will appear in this preview as the AI generates the code</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold">
-                3
-              </div>
-              <div>
-                <h3 className="font-semibold text-white mb-1">Refine and iterate</h3>
-                <p className="text-blue-200/80 text-sm">Continue the conversation to add features and make changes</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-sm text-blue-300/60">
-              No coding required • Just describe what you want
-            </p>
+          <div className="flex items-center gap-3">
+            <button onClick={seed} disabled={seedLoading} className="px-3 py-1.5 rounded-md bg-white text-slate-900 text-sm font-medium disabled:opacity-60">
+              {seedLoading ? 'Seeding…' : 'Seed sample data'}
+            </button>
           </div>
         </div>
-      </div>
+      </header>
+
+      <Hero />
+
+      <main className="max-w-6xl mx-auto px-6">
+        <div className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-5 -mt-10 relative z-10">
+          <SegmentPicker value={segment} onChange={setSegment} />
+        </div>
+
+        <TopCreators segment={segment} />
+
+        <section className="mt-12 mb-16 grid md:grid-cols-2 gap-6">
+          <div className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-6">
+            <h3 className="text-xl font-semibold text-white">Why this is different</h3>
+            <p className="mt-2 text-slate-300 text-sm leading-6">
+              You decide what your audience sees. Segments empower creators to present their work the way it should be found. Consumers browse by interest, not fleeting trends.
+            </p>
+          </div>
+          <div className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-6">
+            <h3 className="text-xl font-semibold text-white">How discovery works</h3>
+            <p className="mt-2 text-slate-300 text-sm leading-6">
+              Each segment showcases its top creators with transparent signals like community ratings and follower reach. No opaque feed — browse, filter, and follow on your terms.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-slate-800 py-8 text-center text-slate-400 text-sm">
+        Built for creators. Powered by segments, not a black-box algorithm.
+      </footer>
     </div>
   )
 }
